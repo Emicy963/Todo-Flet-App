@@ -38,10 +38,52 @@ def main(page: ft.Page):
         ],
         scroll=True
     )
+
+    # List Todos
+    todo_table = ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text('Title')),
+            ft.DataColumn(ft.Text('Create at')),
+            ft.DataColumn(ft.Text('Deadline')),
+            ft.DataColumn(ft.Text('Finish at')),
+        ],
+        rows=[]
+    )
+
+    def list_todo(e):
+        response = requests.get(API_BASE_URL + '')
+        todos = response.json()
+
+        todo_table.rows.clear()
+
+        for todo in todos:
+            row = ft.DataRow(
+                cells=[
+                    ft.DataCell(ft.Text(todo.get('title'))),
+                    ft.DataCell(ft.Text(todo.get('created_at'))),
+                    ft.DataCell(ft.Text(todo.get('deadline'))),
+                    ft.DataCell(ft.Text(todo.get('finished_at')))
+                ]
+            )
+            todo_table.rows.append(row)
+        list_result.value = f'{len(todos)} todos founds'
+        page.update()
+
+    list_result = ft.Text()
+    list_button = ft.ElevatedButton(text='List Todos', on_click=list_todo)
+    list_todos_tab = ft.Column(
+        [todo_table,
+         list_result,
+         list_button,
+         ],
+         scroll=True
+    )
+
     tabs = ft.Tabs(
         selected_index=0,
         tabs=[
-            ft.Tab(text='Create Todo', content=creat_todo_tab)
+            ft.Tab(text='Create Todo', content=creat_todo_tab),
+            ft.Tab(text='List Todos', content=list_todos_tab),
         ]
     )
 
