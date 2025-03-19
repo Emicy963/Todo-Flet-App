@@ -9,7 +9,7 @@ def main(page: ft.Page):
     
     # Create Todo
     title_field = ft.TextField(label='Title')
-    deadline_field = ft.TextField(label='Deadline (DD-MM-YYYY)')
+    deadline_field = ft.TextField(label='Deadline (YYYY-MM-DD)')
     creata_result = ft.Text()
 
     def creat_todo(e):
@@ -39,16 +39,33 @@ def main(page: ft.Page):
         scroll=True
     )
 
-    # List Todos
+    # List, Finish, Edit and Delete Todos
     todo_table = ft.DataTable(
         columns=[
+            ft.DataColumn(ft.Text('#')),
             ft.DataColumn(ft.Text('Title')),
             ft.DataColumn(ft.Text('Create at')),
             ft.DataColumn(ft.Text('Deadline')),
             ft.DataColumn(ft.Text('Finish at')),
+            ft.DataColumn(ft.Text('Options')),
         ],
         rows=[]
     )
+
+    def finish_todo(e):
+        todo_id = e.control.data
+        try:
+            response = requests.get(f'{API_BASE_URL}complete/{todo_id}')
+
+            if response.status_code == 200:
+                list_todo(None)
+                page.snack_bar = ft.SnackBar(ft.Text('Sucess Finished'))
+                page.snack_bar.open = True
+                page.update()
+        except Exception as ex:
+            page.snack_bar = ft.SnackBar(ft.Text(f'Erro: {str(ex)}'))
+            page.snack_bar.open = True
+            page.update()
 
     def list_todo(e):
         response = requests.get(API_BASE_URL + '')
@@ -56,13 +73,17 @@ def main(page: ft.Page):
 
         todo_table.rows.clear()
 
+        finish_button = ft.ElevatedButton(text='Finish Todo')
+
         for todo in todos:
             row = ft.DataRow(
                 cells=[
+                    ft.DataCell(ft.Text(todo.get('id'))),
                     ft.DataCell(ft.Text(todo.get('title'))),
                     ft.DataCell(ft.Text(todo.get('created_at'))),
                     ft.DataCell(ft.Text(todo.get('deadline'))),
-                    ft.DataCell(ft.Text(todo.get('finished_at')))
+                    ft.DataCell(ft.Text(todo.get('finished_at'))),
+                    ft.DataCell(finish_button)
                 ]
             )
             todo_table.rows.append(row)
