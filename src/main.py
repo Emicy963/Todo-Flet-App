@@ -39,7 +39,7 @@ def main(page: ft.Page):
         scroll=True
     )
 
-    # List, Finish, Edit and Delete Todos
+    # List Todos
     todo_table = ft.DataTable(
         columns=[
             ft.DataColumn(ft.Text('#')),
@@ -52,30 +52,20 @@ def main(page: ft.Page):
         rows=[]
     )
 
-    def finish_todo(e):
-        todo_id = e.control.data
-        try:
-            response = requests.get(f'{API_BASE_URL}complete/{todo_id}')
-
-            if response.status_code == 200:
-                list_todo(None)
-                page.snack_bar = ft.SnackBar(ft.Text('Sucess Finished'))
-                page.snack_bar.open = True
-                page.update()
-        except Exception as ex:
-            page.snack_bar = ft.SnackBar(ft.Text(f'Erro: {str(ex)}'))
-            page.snack_bar.open = True
-            page.update()
-
     def list_todo(e):
         response = requests.get(API_BASE_URL + '')
         todos = response.json()
 
         todo_table.rows.clear()
 
-        finish_button = ft.ElevatedButton(text='Finish Todo')
-
         for todo in todos:
+            finish_button = ft.ElevatedButton(
+                text='Finish Todo',
+                data=todo['id'],
+                on_click=finish_todo,
+                disabled=bool(todo.get('finished_at'))
+                )
+            
             row = ft.DataRow(
                 cells=[
                     ft.DataCell(ft.Text(todo.get('id'))),
@@ -89,6 +79,22 @@ def main(page: ft.Page):
             todo_table.rows.append(row)
         list_result.value = f'{len(todos)} todos founds'
         page.update()
+
+    # Finished Todo
+    def finish_todo(e):
+        todo_id = e.control.data
+        try:
+            response = requests.put(f'{API_BASE_URL}complete/{todo_id}')
+
+            if response.status_code == 200:
+                list_todo(None)
+                page.snack_bar = ft.SnackBar(ft.Text('Sucess Finished'))
+                page.snack_bar.open = True
+                page.update()
+        except Exception as ex:
+            page.snack_bar = ft.SnackBar(ft.Text(f'Conection Error: {str(ex)}'))
+            page.snack_bar.open = True
+            page.update()
 
     list_result = ft.Text()
     list_button = ft.ElevatedButton(text='List Todos', on_click=list_todo)
