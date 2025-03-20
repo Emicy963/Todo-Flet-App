@@ -10,7 +10,7 @@ def main(page: ft.Page):
     # Create Todo
     title_field = ft.TextField(label='Title')
     deadline_field = ft.TextField(label='Deadline (YYYY-MM-DD)')
-    creata_result = ft.Text()
+    create_result = ft.Text()
 
     def creat_todo(e):
         payload = {
@@ -21,13 +21,13 @@ def main(page: ft.Page):
             response = requests.post(API_BASE_URL + 'todos', json=payload)
             if response.status_code == 201:
                 todo = response.json()
-                creata_result.value = f'Create Todo: {todo}'
+                create_result.value = f'Create Todo: {todo}'
             else:
-                creata_result.value = f'Erro: {response.text}'
+                create_result.value = f'Erro: {response.text}'
 
             page.update()
         except Exception as ex:
-            creata_result.value = f'Erro: {str(ex)}'
+            create_result.value = f'Erro: {str(ex)}'
 
     creata_button = ft.ElevatedButton(text='New Todo', on_click=creat_todo)
 
@@ -35,7 +35,7 @@ def main(page: ft.Page):
         [
             title_field,
             deadline_field,
-            creata_result,
+            create_result,
             creata_button,
         ],
         scroll=True
@@ -134,11 +134,45 @@ def main(page: ft.Page):
          scroll=True
     )
 
+    #Update Todo
+    id_field = ft.TextField(label='ID Todo')
+    title_update_field = ft.TextField(label='Title')
+    deadline_update_field = ft.TextField(label='Deadline (YYYY-MM-DD)')
+
+    def update_todo(e):
+        payload = {
+            'title': title_update_field.value,
+            'deadline': deadline_update_field.value
+        }
+        try:
+            response = requests.put(f'{API_BASE_URL}{int(id_field.value)}', json=payload)
+
+            if response.status_code == 200:
+                update_result.value = 'Todo Sucess Update'
+                page.update()
+        except Exception as ex:
+            update_result.value = f'Erro: {str(ex)}'
+            page.update()
+
+    update_result = ft.Text()
+    update_button = ft.ElevatedButton(text='Update Todo', on_click=update_todo)
+    update_todo_tab = ft.Column(
+        [
+            id_field,
+            title_update_field,
+            deadline_update_field,
+            update_result,
+            update_button,
+        ],
+        scroll=True
+    )
+
     tabs = ft.Tabs(
         selected_index=0,
         tabs=[
             ft.Tab(text='Create Todo', content=creat_todo_tab),
             ft.Tab(text='List Todos', content=list_todos_tab),
+            ft.Tab(text='Update Todos', content=update_todo_tab),
         ]
     )
 
