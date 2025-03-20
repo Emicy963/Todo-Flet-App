@@ -1,7 +1,7 @@
 import flet as ft
 import requests
 
-API_BASE_URL = 'http://localhost:8000/api/todos/'
+API_BASE_URL = 'http://localhost:8000/api/'
 
 def main(page: ft.Page):
     page.title = 'Todo Mobile App'
@@ -17,15 +17,17 @@ def main(page: ft.Page):
             'title': title_field.value,
             'deadline': deadline_field.value,
         }
+        try:
+            response = requests.post(API_BASE_URL + 'todos', json=payload)
+            if response.status_code == 201:
+                todo = response.json()
+                creata_result.value = f'Create Todo: {todo}'
+            else:
+                creata_result.value = f'Erro: {response.text}'
 
-        response = requests.post(API_BASE_URL + '', json=payload)
-        if response.status_code == 201:
-            todo = response.json()
-            creata_result.value = f'Create Todo: {todo}'
-        else:
-            creata_result.value = f'Erro: {response.text}'
-
-        page.update()
+            page.update()
+        except Exception as ex:
+            creata_result.value = f'Erro: {str(ex)}'
 
     creata_button = ft.ElevatedButton(text='New Todo', on_click=creat_todo)
 
@@ -53,47 +55,49 @@ def main(page: ft.Page):
     )
 
     def list_todo(e):
-        response = requests.get(API_BASE_URL + '')
-        todos = response.json()
+        try:
+            response = requests.get(API_BASE_URL + 'todos')
+            todos = response.json()
 
-        todo_table.rows.clear()
+            todo_table.rows.clear()
 
-        for todo in todos:
-            finish_button = ft.ElevatedButton(
-                text='Finish Todo',
-                data=todo['id'],
-                on_click=finish_todo,
-                disabled=bool(todo.get('finished_at'))
+            for todo in todos:
+                finish_button = ft.ElevatedButton(
+                    text='Finish Todo',
+                    data=todo['id'],
+                    on_click=finish_todo,
+                    disabled=bool(todo.get('finished_at'))
+                    )
+                
+                row = ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(todo.get('id'))),
+                        ft.DataCell(ft.Text(todo.get('title'))),
+                        ft.DataCell(ft.Text(todo.get('created_at'))),
+                        ft.DataCell(ft.Text(todo.get('deadline'))),
+                        ft.DataCell(ft.Text(todo.get('finished_at'))),
+                        ft.DataCell(finish_button)
+                    ]
                 )
-            
-            row = ft.DataRow(
-                cells=[
-                    ft.DataCell(ft.Text(todo.get('id'))),
-                    ft.DataCell(ft.Text(todo.get('title'))),
-                    ft.DataCell(ft.Text(todo.get('created_at'))),
-                    ft.DataCell(ft.Text(todo.get('deadline'))),
-                    ft.DataCell(ft.Text(todo.get('finished_at'))),
-                    ft.DataCell(finish_button)
-                ]
-            )
-            todo_table.rows.append(row)
-        list_result.value = f'{len(todos)} todos founds'
-        page.update()
+                todo_table.rows.append(row)
+            list_result.value = f'{len(todos)} todos founds'
+            page.update()
+        except Exception as ex:
+            list_result.value = f'Erro: {str(ex)}'
+            page.update()
 
     # Finished Todo
     def finish_todo(e):
         todo_id = e.control.data
         try:
-            response = requests.put(f'{API_BASE_URL}complete/{todo_id}')
+            response = requests.put(f'{API_BASE_URL}todo/complete/{todo_id}')
 
             if response.status_code == 200:
                 list_todo(None)
-                page.snack_bar = ft.SnackBar(ft.Text('Sucess Finished'))
-                page.snack_bar.open = True
+                list_result.value = 'Sucess Finished'
                 page.update()
         except Exception as ex:
-            page.snack_bar = ft.SnackBar(ft.Text(f'Conection Error: {str(ex)}'))
-            page.snack_bar.open = True
+            list_result.value = f'Conection Error: {str(ex)}'
             page.update()
 
     list_result = ft.Text()
