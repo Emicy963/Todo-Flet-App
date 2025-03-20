@@ -49,7 +49,8 @@ def main(page: ft.Page):
             ft.DataColumn(ft.Text('Create at')),
             ft.DataColumn(ft.Text('Deadline')),
             ft.DataColumn(ft.Text('Finish at')),
-            ft.DataColumn(ft.Text('Options')),
+            ft.DataColumn(ft.Text('Finish')),
+            ft.DataColumn(ft.Text('Delete')),
         ],
         rows=[]
     )
@@ -66,8 +67,16 @@ def main(page: ft.Page):
                     text='Finish Todo',
                     data=todo['id'],
                     on_click=finish_todo,
+                    on_hover=True,
                     disabled=bool(todo.get('finished_at'))
                     )
+                #Delete Button
+                delete_button = ft.ElevatedButton(
+                    text='Delete Todo',
+                    data=todo['id'],
+                    on_click=delete_todo,
+                    on_hover=True,
+                )
                 
                 row = ft.DataRow(
                     cells=[
@@ -76,7 +85,8 @@ def main(page: ft.Page):
                         ft.DataCell(ft.Text(todo.get('created_at'))),
                         ft.DataCell(ft.Text(todo.get('deadline'))),
                         ft.DataCell(ft.Text(todo.get('finished_at'))),
-                        ft.DataCell(finish_button)
+                        ft.DataCell(finish_button),
+                        ft.DataCell(delete_button),
                     ]
                 )
                 todo_table.rows.append(row)
@@ -95,6 +105,20 @@ def main(page: ft.Page):
             if response.status_code == 200:
                 list_todo(None)
                 list_result.value = 'Sucess Finished'
+                page.update()
+        except Exception as ex:
+            list_result.value = f'Conection Error: {str(ex)}'
+            page.update()
+
+    #Delete Todo
+    def delete_todo(e):
+        todo_id = e.control.data
+        try:
+            response = requests.delete(f'{API_BASE_URL}todo/{todo_id}')
+
+            if response.status_code == 204:
+                list_todo(None)
+                list_result.value = 'Sucess Delete'
                 page.update()
         except Exception as ex:
             list_result.value = f'Conection Error: {str(ex)}'
