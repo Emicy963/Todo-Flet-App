@@ -71,10 +71,10 @@ class TodoViews:
             self.todo_table.rows.clear()
 
             for todo in todos:
-                finish_button = ft.ElevatedButton(
+                complete_button = ft.ElevatedButton(
                     text='Finish Todo',
                     data=todo['id'],
-                    on_click=self.finish_todo_click,
+                    on_click=self.complete_todo_click,
                     disabled=bool(todo.get('finished_at'))
                 )
                 # Delete Button
@@ -91,7 +91,7 @@ class TodoViews:
                         ft.DataCell(ft.Text(todo.get('created_at'))),
                         ft.DataCell(ft.Text(todo.get('deadline'))),
                         ft.DataCell(ft.Text(todo.get('finished_at'))),
-                        ft.DataCell(finish_button),
+                        ft.DataCell(complete_button),
                         ft.DataCell(delete_button),
                     ])
                 self.todo_table.rows.append(row)
@@ -113,4 +113,17 @@ class TodoViews:
             self.create_result.value = f'Erro: {str(ex)}'
             self.page.update()
 
-    
+    def delete_todo_click(self, e):
+        todo_id = e.control.data
+        try:
+            response = self.controller.handle_delete_todo(todo_id)
+
+            if response.status_code == 200:
+                self.list_todo_click(None)
+                self.list_result.value = 'Sucess Delete Todo'
+                self.page.update()
+        except Exception as ex:
+            self.list_result.value = f'Error: {str(ex)}'
+            self.page.update()
+
+
