@@ -1,5 +1,5 @@
 import flet as ft
-from ..controllers.todo_controller import TodoController
+from src.controllers.todo_controller import TodoController
 
 class TodoViews:
     def __init__(self, controller: TodoController, page: ft.Page):
@@ -37,7 +37,9 @@ class TodoViews:
         return ft.Tabs(
             selected_index=0,
             tabs=[
-                ft.Tab(text='Create Todo', content=self.create_tab())
+                ft.Tab(text='Create Todo', content=self.create_tab()),
+                ft.Tab(text='List Todo', content=self.list_tab()),
+                ft.Tab(text='Update Todo', content=self.update_tab()),
             ]
         )
     
@@ -106,7 +108,7 @@ class TodoViews:
         try:
             response = self.controller.handle_create_todo(self.title_field.value, self.deadline_field.value)
 
-            self.create_result.value = f'Create Todo Sucess' if response.status_code==201 else self.create_result.value = f'Create Todo Error!'
+            self.create_result.value = f'Create Todo Sucess' if response.status_code==201 else f'Create Todo Error!'
 
             self.page.update()
         except Exception as ex:
@@ -117,7 +119,7 @@ class TodoViews:
         try:
             response = self.controller.handle_update_todo(self.id_field, self.title_update_field, self.deadline_update_field)
 
-            self.update_result.value = 'Todo Sucess Update' if response.status_code==200 else self.update_result.value = 'Update Todo Error'
+            self.update_result.value = 'Todo Sucess Update' if response.status_code==200 else 'Update Todo Error'
             self.page.update()
         except Exception as ex:
             self.update_result.value = f'Error: {str(ex)}'

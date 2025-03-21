@@ -1,4 +1,4 @@
-from ..models.todo_model import TodoModel
+from src.models.todo_model import TodoModel
 
 class TodoController:
     def __init__(self, model: TodoModel):

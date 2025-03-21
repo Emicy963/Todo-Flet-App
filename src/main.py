@@ -1,4 +1,19 @@
 import flet as ft
+from src.models.todo_model import TodoModel
+from src.controllers.todo_controller import TodoController
+from src.views.todo_view import TodoViews
+
+API_BASE_URL = 'http://localhost:8000/api/'
+
+def main(page:ft.Page):
+    model = TodoModel(API_BASE_URL)
+    controller = TodoController(model)
+    view = TodoViews(controller, ft.Page)
+    page.add(view.build())
+
+if __name__=='__main__':
+    ft.app(target=main)
+"""import flet as ft
 import requests
 
 API_BASE_URL = 'http://localhost:8000/api/'
@@ -182,3 +197,4 @@ def main(page: ft.Page):
 
 if __name__ == '__main__':
     ft.app(target=main)
+"""
