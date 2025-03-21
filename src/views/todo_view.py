@@ -102,4 +102,15 @@ class TodoViews:
             self.list_result.value = f'Erro: {str(ex)}'
             self.page.update()
 
+    def create_todo_click(self, e):
+        try:
+            response = self.controller.handle_create_todo(self.title_field.value, self.deadline_field.value)
+
+            self.create_result.value = f'Create Todo Sucess' if response.status_code==201 else self.create_result.value = f'Create Todo Error!'
+
+            self.page.update()
+        except Exception as ex:
+            self.create_result.value = f'Erro: {str(ex)}'
+            self.page.update()
+
     
