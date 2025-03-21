@@ -64,4 +64,42 @@ class TodoViews:
             ft.ElevatedButton(text='Update Todo', on_click=self.update_todo_click)
         ], scroll=True)
     
+    def list_todo_click(self, e):
+        try:
+            todos = self.controller.handle_get_all_todo().json()
+
+            self.todo_table.rows.clear()
+
+            for todo in todos:
+                finish_button = ft.ElevatedButton(
+                    text='Finish Todo',
+                    data=todo['id'],
+                    on_click=self.finish_todo_click,
+                    disabled=bool(todo.get('finished_at'))
+                )
+                # Delete Button
+                delete_button = ft.ElevatedButton(
+                    text='Delete Todo',
+                    data=todo['id'],
+                    on_click=self.delete_todo_click,
+                )
+
+                row = ft.DataRow(
+                    cells=[
+                        ft.DataCell(ft.Text(todo.get('id'))),
+                        ft.DataCell(ft.Text(todo.get('title'))),
+                        ft.DataCell(ft.Text(todo.get('created_at'))),
+                        ft.DataCell(ft.Text(todo.get('deadline'))),
+                        ft.DataCell(ft.Text(todo.get('finished_at'))),
+                        ft.DataCell(finish_button),
+                        ft.DataCell(delete_button),
+                    ])
+                self.todo_table.rows.append(row)
+            
+            self.list_result.value = f'{len(todos)} todos founds'
+            self.page.update()
+        except Exception as ex:
+            self.list_result.value = f'Erro: {str(ex)}'
+            self.page.update()
+
     
