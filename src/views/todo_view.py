@@ -118,7 +118,7 @@ class TodoViews:
         try:
             response = self.controller.handle_delete_todo(todo_id)
 
-            if response.status_code == 200:
+            if response.status_code == 204:
                 self.list_todo_click(None)
                 self.list_result.value = 'Sucess Delete Todo'
                 self.page.update()
@@ -126,4 +126,15 @@ class TodoViews:
             self.list_result.value = f'Error: {str(ex)}'
             self.page.update()
 
+    def complete_todo_click(self, e):
+        todo_id = e.control.data
+        try:
+            response = self.controller.handle_complete_todo(todo_id)
 
+            if response.status_code == 200:
+                self.list_todo_click(None)
+                self.list_result.value = 'Sucess Delete'
+                self.page.update()
+        except Exception as ex:
+            self.list_result.value = f'Erro: {str(ex)}'
+            self.page.update()
